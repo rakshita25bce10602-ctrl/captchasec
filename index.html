@@ -143,14 +143,37 @@
         <!-- CAPTCHA canvas -->
         <div class="captcha-area" role="img" aria-label="CAPTCHA challenge image">
           <canvas class="captcha-area__canvas" id="captcha-canvas" width="400" height="160"></canvas>
-          <button
-            class="captcha-area__refresh"
-            id="captcha-refresh"
-            type="button"
-            aria-label="Generate new CAPTCHA"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
-          </button>
+
+          <!-- success / fail overlay -->
+          <div class="captcha-overlay" id="captcha-overlay" aria-hidden="true"></div>
+
+          <!-- toolbar: audio + refresh -->
+          <div class="captcha-area__toolbar">
+            <button
+              class="captcha-area__audio"
+              id="captcha-audio"
+              type="button"
+              aria-label="Listen to CAPTCHA code"
+              title="Audio CAPTCHA"
+            >
+              <!-- speaker icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            </button>
+            <button
+              class="captcha-area__refresh"
+              id="captcha-refresh"
+              type="button"
+              aria-label="Generate new CAPTCHA"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+            </button>
+          </div>
+
+          <!-- countdown timer -->
+          <div class="captcha-timer" id="captcha-timer" aria-live="polite">
+            <svg class="captcha-timer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span class="captcha-timer__text" id="captcha-timer-text">02:00</span>
+          </div>
         </div>
 
         <!-- CAPTCHA input -->
@@ -167,6 +190,9 @@
           />
           <span id="captcha-hint" class="sr-only">Type the characters shown in the image above.</span>
         </div>
+
+        <!-- Feedback message -->
+        <div class="captcha-feedback" id="captcha-feedback" role="alert" aria-live="assertive"></div>
 
         <!-- Honeypot (invisible to real users) -->
         <div class="hp-field" aria-hidden="true">

@@ -316,6 +316,7 @@
   overflow: hidden;
   border: 1px solid var(--clr-border);
   background: var(--clr-surface-solid);
+  transition: border-color var(--dur-norm) var(--ease-out);
 }
 
 .captcha-area__canvas {
@@ -325,10 +326,17 @@
   background: var(--clr-bg-alt);
 }
 
-.captcha-area__refresh {
+/* toolbar (audio + refresh, top-right) */
+.captcha-area__toolbar {
   position: absolute;
   top: var(--sp-2);
   right: var(--sp-2);
+  display: flex;
+  gap: var(--sp-1);
+}
+
+.captcha-area__refresh,
+.captcha-area__audio {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -343,16 +351,177 @@
     background var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
 }
-.captcha-area__refresh:hover {
+.captcha-area__refresh:hover,
+.captcha-area__audio:hover {
   color: var(--clr-accent);
   background: var(--clr-accent-glow);
 }
 .captcha-area__refresh:active {
   transform: rotate(90deg) scale(0.9);
 }
-.captcha-area__refresh svg {
+.captcha-area__audio:active {
+  transform: scale(0.88);
+}
+.captcha-area__refresh svg,
+.captcha-area__audio svg {
   width: 16px;
   height: 16px;
+}
+
+/* audio speaking state */
+.captcha-audio--speaking {
+  color: var(--clr-accent) !important;
+  background: var(--clr-accent-glow) !important;
+  animation: pulse-audio 0.8s ease-in-out infinite;
+}
+@keyframes pulse-audio {
+  0%, 100% { box-shadow: 0 0 0 0 var(--clr-accent-glow); }
+  50%      { box-shadow: 0 0 0 6px transparent; }
+}
+
+/* countdown timer bar */
+.captcha-timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) 0;
+  background: var(--clr-surface);
+  border-top: 1px solid var(--clr-border);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--clr-text-muted);
+  letter-spacing: 0.06em;
+  transition: color var(--dur-norm) var(--ease-out),
+              background var(--dur-norm) var(--ease-out);
+}
+.captcha-timer__icon {
+  width: 13px;
+  height: 13px;
+}
+.captcha-timer--warn {
+  color: var(--clr-warning);
+}
+.captcha-timer--expired {
+  color: var(--clr-danger);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* overlay (success / fail checkmark) */
+.captcha-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-norm) var(--ease-out);
+  z-index: 5;
+}
+.captcha-overlay--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── success checkmark SVG animation ── */
+.checkmark {
+  width: 64px;
+  height: 64px;
+}
+.checkmark__circle {
+  stroke: var(--clr-success);
+  stroke-width: 2.5;
+  stroke-dasharray: 151;
+  stroke-dashoffset: 151;
+  animation: cm-circle 0.5s ease-out 0.1s forwards;
+}
+.checkmark__check {
+  stroke: var(--clr-success);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: cm-check 0.35s ease-out 0.5s forwards;
+}
+@keyframes cm-circle {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes cm-check {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ── failure X SVG animation ── */
+.xmark {
+  width: 64px;
+  height: 64px;
+}
+.xmark__circle {
+  stroke: var(--clr-danger);
+  stroke-width: 2.5;
+  stroke-dasharray: 151;
+  stroke-dashoffset: 151;
+  animation: cm-circle 0.5s ease-out 0.1s forwards;
+}
+.xmark__x {
+  stroke: var(--clr-danger);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+  animation: xm-draw 0.35s ease-out 0.5s forwards;
+}
+@keyframes xm-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ── feedback message ── */
+.captcha-feedback {
+  min-height: 1.4em;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: center;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.captcha-feedback:empty { display: none; }
+.captcha-feedback--success { color: var(--clr-success); }
+.captcha-feedback--error   { color: var(--clr-danger); }
+.captcha-feedback--warn    { color: var(--clr-warning); }
+
+/* ── card state modifiers ── */
+.card--shake {
+  animation: shake 0.45s ease-in-out;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%      { transform: translateX(-8px); }
+  30%      { transform: translateX(7px); }
+  45%      { transform: translateX(-6px); }
+  60%      { transform: translateX(5px); }
+  75%      { transform: translateX(-3px); }
+  90%      { transform: translateX(2px); }
+}
+
+.card--success {
+  border-color: var(--clr-success) !important;
+  box-shadow: var(--shadow-lg), 0 0 24px var(--clr-success-glow) !important;
+}
+
+.card--fail .captcha-area {
+  border-color: var(--clr-danger);
+}
+
+.card--locked {
+  opacity: 0.7;
+  pointer-events: none;
+}
+.card--locked .captcha-area {
+  border-color: var(--clr-danger);
 }
 
 /* ── input group ── */

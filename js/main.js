@@ -10,5 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Theme
   UI.initTheme();
 
-  // Future: initialise captcha, behaviour tracking, etc.
+  // CAPTCHA
+  Captcha.init();
 });
