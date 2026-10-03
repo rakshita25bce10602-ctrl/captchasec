@@ -96,6 +96,9 @@ const Captcha = (() => {
     startCountdown();
     startTime = performance.now();
 
+    /* reset behaviour tracking for this challenge */
+    if (typeof Behaviour !== 'undefined') Behaviour.reset();
+
     /* update analytics */
     updateMetric('metric-attempts', `${attempts} / ${CFG.MAX_ATTEMPTS}`);
     updateStatus('Awaiting verification attempt…');
@@ -252,6 +255,7 @@ const Captcha = (() => {
     svg.style.transform  = 'rotate(360deg)';
     setTimeout(() => { svg.style.transition = 'none'; svg.style.transform = ''; }, 480);
 
+    if (typeof Behaviour !== 'undefined') Behaviour.trackRefresh();
     generate();
   }
 
@@ -286,6 +290,12 @@ const Captcha = (() => {
     attempts++;
     updateMetric('metric-attempts', `${attempts} / ${CFG.MAX_ATTEMPTS}`);
 
+    /* run scoring engine */
+    if (typeof Behaviour !== 'undefined' && typeof Scoring !== 'undefined') {
+      const signals = Behaviour.getSignals();
+      Scoring.evaluate(signals);
+    }
+
     /* compare (case-insensitive) */
     if (input.toLowerCase() === code.toLowerCase()) {
       onSuccess(elapsed);
@@ -308,12 +318,14 @@ const Captcha = (() => {
     /* auto-reset after a moment so the demo is replayable */
     setTimeout(() => {
       attempts = 0;
+      if (typeof Behaviour !== 'undefined') Behaviour.fullReset();
       generate();
     }, 3500);
   }
 
   /* ── failure ── */
   function onFail() {
+    if (typeof Behaviour !== 'undefined') Behaviour.trackFailedAttempt();
     shakeCard();
     setFeedback(
       `✗ Incorrect code. ${CFG.MAX_ATTEMPTS - attempts} attempt${CFG.MAX_ATTEMPTS - attempts === 1 ? '' : 's'} remaining.`,

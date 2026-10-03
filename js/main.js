@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Theme
   UI.initTheme();
 
-  // CAPTCHA
+  // Behaviour tracking (must init before captcha so listeners are ready)
+  Behaviour.init();
+
+  // CAPTCHA (calls Behaviour.reset() on first generate)
   Captcha.init();
 });
