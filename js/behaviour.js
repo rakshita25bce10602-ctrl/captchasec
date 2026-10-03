@@ -33,6 +33,7 @@ const Behaviour = (() => {
   let hasMouseMoved   = false;
   let envFlags        = {};   // computed once in init()
   let active          = false;
+  let lastLoggedMouse = 0;
 
   /* ─────────── init ─────────── */
   function init() {
@@ -47,11 +48,30 @@ const Behaviour = (() => {
     if (input) {
       input.addEventListener('keydown',  onKeyDown);
       input.addEventListener('paste',    onPaste);
+      input.addEventListener('focus',    () => {
+        if (typeof EventLog !== 'undefined') EventLog.log('SYSTEM', 'Input field focused');
+      });
+    }
+
+    /* honeypot monitor */
+    const hp = UI.$('hp-email');
+    if (hp) {
+      hp.addEventListener('input', () => {
+        if (hp.value && typeof EventLog !== 'undefined') {
+          EventLog.log('SECURITY', 'Honeypot field modified: email_confirm populated!');
+        }
+      });
     }
 
     /* focus / blur */
-    window.addEventListener('focus', () => { focusBlurs++; });
-    window.addEventListener('blur',  () => { focusBlurs++; });
+    window.addEventListener('focus', () => {
+      focusBlurs++;
+      if (typeof EventLog !== 'undefined') EventLog.log('SYSTEM', 'Window regained focus');
+    });
+    window.addEventListener('blur',  () => {
+      focusBlurs++;
+      if (typeof EventLog !== 'undefined') EventLog.log('SYSTEM', 'Window lost focus (blur)');
+    });
 
     /* tab visibility */
     document.addEventListener('visibilitychange', onVisibility);
@@ -70,9 +90,13 @@ const Behaviour = (() => {
     focusBlurs     = 0;
     startTime      = performance.now();
     active         = true;
+    lastLoggedMouse = 0;
+    if (typeof EventLog !== 'undefined') {
+      EventLog.resetSession();
+    }
   }
 
-  /** Hard reset — clears everything (after success / lockout end). */
+  /** Hard reset — clears everything (after success / lockout end / demo reset). */
   function fullReset() {
     reset();
     refreshCount   = 0;
@@ -83,58 +107,88 @@ const Behaviour = (() => {
 
   function onMouseMove(e) {
     if (!active) return;
-    hasMouseMoved = true;
-    mousePoints.push({ x: e.clientX, y: e.clientY, t: performance.now() });
-    /* cap stored points to avoid memory growth in long sessions */
-    if (mousePoints.length > 2000) mousePoints = mousePoints.slice(-1500);
+    recordMousePoint(e.clientX, e.clientY, performance.now());
   }
 
   function onTouchMove(e) {
     if (!active || !e.touches.length) return;
     const t = e.touches[0];
-    hasMouseMoved = true;
-    mousePoints.push({ x: t.clientX, y: t.clientY, t: performance.now() });
+    recordMousePoint(t.clientX, t.clientY, performance.now());
+  }
+
+  function recordMousePoint(x, y, t = performance.now()) {
+    if (!active) return;
+    if (!hasMouseMoved) {
+      hasMouseMoved = true;
+      if (typeof EventLog !== 'undefined') {
+        EventLog.log('MOUSE', `Initial pointer movement (x: ${Math.round(x)}, y: ${Math.round(y)})`);
+      }
+    }
+    mousePoints.push({ x, y, t });
+
+    // Periodically log milestone mouse count for timeline visibility
+    if (t - lastLoggedMouse > 1200 && mousePoints.length > 10) {
+      lastLoggedMouse = t;
+      if (typeof EventLog !== 'undefined') {
+        const ratio = mousePathRatio();
+        EventLog.log('MOUSE', `Trajectory active: ${mousePoints.length} points${ratio ? ` (curvature: ${ratio.toFixed(2)})` : ''}`);
+      }
+    }
+
     if (mousePoints.length > 2000) mousePoints = mousePoints.slice(-1500);
   }
 
-  function onKeyDown() {
+  function onKeyDown(e) {
     if (!active) return;
-    keystrokeTimes.push(performance.now());
+    recordKey(performance.now(), e ? e.key : null);
+  }
+
+  function recordKey(t = performance.now(), keyChar = null) {
+    if (!active) return;
+    const prev = keystrokeTimes.length ? keystrokeTimes[keystrokeTimes.length - 1] : null;
+    const delta = prev ? Math.round(t - prev) : 0;
+    keystrokeTimes.push(t);
+
+    if (typeof EventLog !== 'undefined') {
+      const charStr = keyChar && keyChar.length === 1 ? `'${keyChar}'` : 'key';
+      EventLog.log('KEYBOARD', `Keydown ${charStr}${delta ? ` (interval: ${delta}ms)` : ' (initial key)'}`);
+    }
   }
 
   function onPaste() {
     if (!active) return;
+    recordPaste();
+  }
+
+  function recordPaste() {
+    if (!active) return;
     pasteCount++;
-    /* update the live metric in the analytics panel */
     const el = UI.$('metric-paste');
     if (el) el.textContent = pasteCount;
+    if (typeof EventLog !== 'undefined') {
+      EventLog.log('PASTE', `Clipboard paste event intercepted (total pastes: ${pasteCount})`);
+    }
   }
 
   function onVisibility() {
     if (document.hidden) {
       hiddenSince = performance.now();
+      if (typeof EventLog !== 'undefined') EventLog.log('SYSTEM', 'Tab switched to background / hidden');
     } else if (hiddenSince !== null) {
-      hiddenDuration += performance.now() - hiddenSince;
+      const dur = performance.now() - hiddenSince;
+      hiddenDuration += dur;
       hiddenSince = null;
+      if (typeof EventLog !== 'undefined') EventLog.log('SYSTEM', `Tab returned to foreground (away for ${(dur / 1000).toFixed(1)}s)`);
     }
   }
 
   /* ─────────── environment probes (run once) ─────────── */
   function checkEnvironment() {
     envFlags = {
-      /** navigator.webdriver is set by Selenium / Puppeteer / Playwright */
       webdriver: !!navigator.webdriver,
-
-      /** Headless Chrome reports 0 plugins */
       noPlugins: navigator.plugins ? navigator.plugins.length === 0 : false,
-
-      /** Headless environments often lack real language arrays */
       noLanguages: !navigator.languages || navigator.languages.length === 0,
-
-      /** HeadlessChrome user-agent substring */
       headlessUA: /HeadlessChrome|PhantomJS|Headless/i.test(navigator.userAgent),
-
-      /** Automation-specific properties on window */
       automationAPIs: !!(
         window._phantom ||
         window.__nightmare ||
@@ -151,9 +205,6 @@ const Behaviour = (() => {
   /**
    * Mouse path "straightness" ratio.
    * Total path length / direct start→end distance.
-   * Value ≈ 1.0 → perfectly straight (bot-like).
-   * Value > 1.3 → natural human movement.
-   * Returns null if too few points.
    */
   function mousePathRatio() {
     if (mousePoints.length < 3) return null;
@@ -162,13 +213,12 @@ const Behaviour = (() => {
       totalDist += dist(mousePoints[i - 1], mousePoints[i]);
     }
     const directDist = dist(mousePoints[0], mousePoints[mousePoints.length - 1]);
-    if (directDist < 1) return null; // cursor didn't really move
+    if (directDist < 1) return null;
     return totalDist / directDist;
   }
 
   /**
    * Mouse speed standard-deviation (px/ms).
-   * Low std-dev → constant robotic speed.
    */
   function mouseSpeedVariance() {
     if (mousePoints.length < 5) return null;
@@ -183,7 +233,6 @@ const Behaviour = (() => {
 
   /**
    * Keystroke inter-key intervals (ms).
-   * Returns { mean, stddev, count }.
    */
   function keystrokeStats() {
     if (keystrokeTimes.length < 2) return null;
@@ -200,45 +249,37 @@ const Behaviour = (() => {
 
   /* ─────────── getSignals() — public snapshot ─────────── */
   function getSignals() {
-    const now  = performance.now();
-    const solveTime = (now - startTime) / 1000;  // seconds
+    const now = performance.now();
+    const solveTime = (now - startTime) / 1000;
 
     return {
-      /* timing */
       solveTime,
-
-      /* mouse */
       mousePointCount:   mousePoints.length,
       hasMouseMoved,
       mousePathRatio:    mousePathRatio(),
       mouseSpeedStddev:  mouseSpeedVariance(),
-
-      /* keyboard */
       keystrokeStats:    keystrokeStats(),
       keystrokeCount:    keystrokeTimes.length,
-
-      /* paste */
       pasteCount,
-
-      /* honeypot */
       honeypotFilled:    !!(UI.$('hp-email') && UI.$('hp-email').value),
-
-      /* attempts & refreshes */
       failedAttempts,
       refreshCount,
-
-      /* focus / visibility */
       focusBlurs,
       hiddenDuration,
-
-      /* environment */
       env: { ...envFlags },
     };
   }
 
-  /* ─────────── session counters (called by captcha.js) ─────── */
-  function trackRefresh()       { refreshCount++;  }
-  function trackFailedAttempt() { failedAttempts++; }
+  /* ─────────── session counters ─────────── */
+  function trackRefresh() {
+    refreshCount++;
+    if (typeof EventLog !== 'undefined') EventLog.log('SYSTEM', `Challenge refreshed (count: ${refreshCount})`);
+  }
+
+  function trackFailedAttempt() {
+    failedAttempts++;
+    if (typeof EventLog !== 'undefined') EventLog.log('SECURITY', `Failed attempt recorded (failures: ${failedAttempts})`);
+  }
 
   /* ─────────── math helpers ─────────── */
   function dist(a, b) {
@@ -261,6 +302,9 @@ const Behaviour = (() => {
     reset,
     fullReset,
     getSignals,
+    recordMousePoint,
+    recordKey,
+    recordPaste,
     trackRefresh,
     trackFailedAttempt,
   };

@@ -99,6 +99,10 @@ const Captcha = (() => {
     /* reset behaviour tracking for this challenge */
     if (typeof Behaviour !== 'undefined') Behaviour.reset();
 
+    if (typeof EventLog !== 'undefined') {
+      EventLog.log('SYSTEM', `New dynamic challenge rendered (${code.length} chars, noise + wave distortion)`);
+    }
+
     /* update analytics */
     updateMetric('metric-attempts', `${attempts} / ${CFG.MAX_ATTEMPTS}`);
     updateStatus('Awaiting verification attempt…');
@@ -464,11 +468,60 @@ const Captcha = (() => {
     else el.style.color = '';
   }
 
-  function updateStatus(text) {
-    const el = UI.$('analytics-status-text');
-    if (el) el.textContent = text;
+  function resetDemo() {
+    clearInterval(timerID);
+    if (cooldownID) clearInterval(cooldownID);
+    locked = false;
+    attempts = 0;
+    if ($refresh) $refresh.disabled = false;
+    if ($input) {
+      $input.value = '';
+      $input.disabled = false;
+    }
+    if ($verifyBtn) $verifyBtn.disabled = false;
+    const hp = UI.$('hp-email');
+    if (hp) hp.value = '';
+    if ($card) {
+      $card.className = 'card';
+    }
+    clearFeedback();
+    hideOverlay();
+
+    if (typeof Behaviour !== 'undefined') Behaviour.fullReset();
+
+    updateMetric('metric-time', '0.00s');
+    updateMetric('metric-paste', '0');
+    updateMetric('metric-attempts', `0 / ${CFG.MAX_ATTEMPTS}`);
+    updateMetric('metric-honeypot', 'Clean', 'var(--clr-success)');
+
+    if (typeof Scoring !== 'undefined') {
+      Scoring.updateUI({
+        score: 25,
+        label: 'Low Risk',
+        colour: 'var(--clr-success)',
+        breakdown: []
+      });
+    }
+
+    if (typeof Simulation !== 'undefined' && Simulation.stop) {
+      Simulation.stop();
+    }
+
+    if (typeof EventLog !== 'undefined') {
+      EventLog.clear();
+      EventLog.log('SYSTEM', 'Demo environment and metrics reset to baseline');
+    }
+
+    generate();
   }
 
   /* ── public API ── */
-  return { init, generate };
+  return {
+    init,
+    generate,
+    getCode: () => code,
+    verify: onVerify,
+    resetDemo,
+    isLocked: () => locked,
+  };
 })();

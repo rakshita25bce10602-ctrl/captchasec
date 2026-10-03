@@ -261,6 +261,9 @@ const Scoring = (() => {
   function evaluate(signals) {
     const result = compute(signals);
     updateUI(result);
+    if (typeof EventLog !== 'undefined') {
+      EventLog.log('SCORE', `Risk Score: ${result.score}/100 (${result.label})`);
+    }
     return result;
   }
 

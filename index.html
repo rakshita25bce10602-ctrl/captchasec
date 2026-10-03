@@ -210,18 +210,61 @@
 
         <!-- Security Demonstration -->
         <div class="demo-block">
-          <span class="demo-block__heading">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            Security Demonstration
-          </span>
+          <div class="demo-block__header">
+            <span class="demo-block__heading">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Security Demonstration
+            </span>
+            <span class="demo-block__mode-label" id="current-mode-label">Mode: Instant Bot</span>
+          </div>
+
           <p class="demo-block__desc">
-            Simulate an automated bot attempting to bypass the verification
-            system and watch the analytics respond in real time.
+            Select an automated bot profile to simulate evasion attempts and observe real-time signal detection.
           </p>
-          <button class="btn-outline" id="sim-btn" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            Run Bot Simulation
-          </button>
+
+          <!-- 4 Bot Mode Selection Pills -->
+          <div class="bot-modes" role="radiogroup" aria-label="Bot simulation modes">
+            <button class="bot-mode-btn bot-mode-btn--active" data-mode="instant" type="button" role="radio" aria-checked="true">
+              <span class="bot-mode-btn__icon">⚡</span>
+              <div class="bot-mode-btn__info">
+                <span class="bot-mode-btn__title">Instant Bot</span>
+                <span class="bot-mode-btn__sub">0ms direct injection</span>
+              </div>
+            </button>
+            <button class="bot-mode-btn" data-mode="slow" type="button" role="radio" aria-checked="false">
+              <span class="bot-mode-btn__icon">🤖</span>
+              <div class="bot-mode-btn__info">
+                <span class="bot-mode-btn__title">Slow Bot</span>
+                <span class="bot-mode-btn__sub">Linear cursor, robotic rhythm</span>
+              </div>
+            </button>
+            <button class="bot-mode-btn" data-mode="pasting" type="button" role="radio" aria-checked="false">
+              <span class="bot-mode-btn__icon">📋</span>
+              <div class="bot-mode-btn__info">
+                <span class="bot-mode-btn__title">Pasting Bot</span>
+                <span class="bot-mode-btn__sub">Clipboard paste + honeypot</span>
+              </div>
+            </button>
+            <button class="bot-mode-btn" data-mode="humanlike" type="button" role="radio" aria-checked="false">
+              <span class="bot-mode-btn__icon">👤</span>
+              <div class="bot-mode-btn__info">
+                <span class="bot-mode-btn__title">Human-like Bot</span>
+                <span class="bot-mode-btn__sub">Curved Bézier, human cadence</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Controls: Run simulation & Reset demo -->
+          <div class="demo-actions">
+            <button class="btn-outline" id="sim-btn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span>Run Bot Simulation</span>
+            </button>
+            <button class="btn-reset" id="reset-demo-btn" type="button" title="Reset everything to initial baseline">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              <span>Reset Demo</span>
+            </button>
+          </div>
         </div>
 
         <hr class="divider" />
@@ -280,6 +323,21 @@
             </div>
           </div>
 
+          <!-- Event Log / Timeline -->
+          <div class="event-log">
+            <div class="event-log__header">
+              <div class="event-log__title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:13px;height:13px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <span>Detection Timeline</span>
+                <span class="event-log__count" id="event-log-count">0 events</span>
+              </div>
+              <button class="event-log__clear" id="event-log-clear" type="button" title="Clear event log">Clear</button>
+            </div>
+            <div class="event-log__list" id="event-log-list" role="log" aria-live="polite">
+              <div class="event-log__empty">Awaiting interactions or simulation...</div>
+            </div>
+          </div>
+
           <!-- status bar -->
           <div class="analytics__status">
             <span class="badge__dot" aria-hidden="true"></span>
@@ -297,7 +355,16 @@
   </footer>
 
 
-  <!-- Scripts (deferred, no logic yet beyond theme toggle) -->
+  <!-- Virtual / Fake Cursor for Bot Simulation -->
+  <div class="fake-cursor" id="fake-cursor" aria-hidden="true">
+    <svg class="fake-cursor__pointer" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 3L11 20L14 13L21 10L4 3Z" fill="var(--clr-accent)" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
+    </svg>
+    <span class="fake-cursor__label" id="fake-cursor-label">🤖 Bot</span>
+    <span class="fake-cursor__ripple" id="fake-cursor-ripple"></span>
+  </div>
+
+  <!-- Scripts -->
   <script src="js/storage.js"    defer></script>
   <script src="js/ui.js"         defer></script>
   <script src="js/behaviour.js"  defer></script>

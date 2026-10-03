@@ -7,12 +7,16 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Theme
+  // Theme & UI
   UI.initTheme();
+  EventLog.init();
 
   // Behaviour tracking (must init before captcha so listeners are ready)
   Behaviour.init();
 
-  // CAPTCHA (calls Behaviour.reset() on first generate)
+  // CAPTCHA challenge engine
   Captcha.init();
+
+  // Bot simulation & virtual cursor
+  Simulation.init();
 });
