@@ -1,0 +1,108 @@
+/* ============================================================
+   DESIGN TOKENS
+   All colours, fonts, spacing, radii and transitions live here.
+   ============================================================ */
+
+/* ---------- dark theme (default) ---------- */
+:root {
+  /* backgrounds */
+  --clr-bg:            #060a14;
+  --clr-bg-alt:        #0c1221;
+  --clr-surface:       rgba(17, 24, 39, 0.70);
+  --clr-surface-solid: #111827;
+  --clr-surface-alt:   #1e293b;
+
+  /* accent */
+  --clr-accent:        #3b82f6;
+  --clr-accent-hover:  #2563eb;
+  --clr-accent-glow:   rgba(59, 130, 246, 0.25);
+  --clr-accent-glow-strong: rgba(59, 130, 246, 0.45);
+
+  /* text */
+  --clr-text:          #e2e8f0;
+  --clr-text-muted:    #94a3b8;
+  --clr-text-heading:  #f8fafc;
+
+  /* semantic */
+  --clr-success:       #22c55e;
+  --clr-success-glow:  rgba(34, 197, 94, 0.25);
+  --clr-warning:       #f59e0b;
+  --clr-danger:        #ef4444;
+
+  /* borders */
+  --clr-border:        rgba(148, 163, 184, 0.12);
+  --clr-border-accent: rgba(59, 130, 246, 0.30);
+
+  /* glassmorphism */
+  --glass-bg:          rgba(17, 24, 39, 0.55);
+  --glass-blur:        16px;
+  --glass-border:      rgba(148, 163, 184, 0.10);
+
+  /* fonts */
+  --font-body:         'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:         'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+
+  /* radii */
+  --radius-xs:  4px;
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  16px;
+  --radius-xl:  24px;
+  --radius-pill: 9999px;
+
+  /* spacing (4-point grid) */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* transitions */
+  --ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast:  120ms;
+  --dur-norm:  200ms;
+  --dur-slow:  350ms;
+
+  /* shadows */
+  --shadow-sm:  0  1px  2px rgba(0,0,0,0.3);
+  --shadow-md:  0  4px 12px rgba(0,0,0,0.4);
+  --shadow-lg:  0  8px 30px rgba(0,0,0,0.5);
+  --shadow-accent: 0 0 20px var(--clr-accent-glow);
+}
+
+/* ---------- light theme ---------- */
+:root[data-theme="light"] {
+  --clr-bg:            #f0f4f8;
+  --clr-bg-alt:        #e2e8f0;
+  --clr-surface:       rgba(255, 255, 255, 0.80);
+  --clr-surface-solid: #ffffff;
+  --clr-surface-alt:   #f1f5f9;
+
+  --clr-accent:        #2563eb;
+  --clr-accent-hover:  #1d4ed8;
+  --clr-accent-glow:   rgba(37, 99, 235, 0.18);
+  --clr-accent-glow-strong: rgba(37, 99, 235, 0.35);
+
+  --clr-text:          #1e293b;
+  --clr-text-muted:    #475569;
+  --clr-text-heading:  #0f172a;
+
+  --clr-success:       #16a34a;
+  --clr-success-glow:  rgba(22, 163, 74, 0.18);
+
+  --clr-border:        rgba(30, 41, 59, 0.12);
+  --clr-border-accent: rgba(37, 99, 235, 0.25);
+
+  --glass-bg:          rgba(255, 255, 255, 0.60);
+  --glass-border:      rgba(30, 41, 59, 0.08);
+
+  --shadow-sm:  0  1px  2px rgba(0,0,0,0.06);
+  --shadow-md:  0  4px 12px rgba(0,0,0,0.08);
+  --shadow-lg:  0  8px 30px rgba(0,0,0,0.10);
+  --shadow-accent: 0 0 20px var(--clr-accent-glow);
+}
