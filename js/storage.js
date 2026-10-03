@@ -1,7 +1,7 @@
 /**
  * storage.js — Local persistence helpers
  *
- * Provides get/set wrappers around localStorage with JSON
+ * Provides get/set/remove wrappers around localStorage with JSON
  * serialisation and fallback for environments where storage
  * is unavailable (e.g. private browsing).
  */
@@ -28,5 +28,14 @@ const Storage = (() => {
     }
   }
 
-  return { get, set };
+  /** @param {string} key */
+  function remove(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  return { get, set, remove };
 })();

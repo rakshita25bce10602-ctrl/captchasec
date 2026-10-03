@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CAPTCHASEC – Intelligent Human Verification</title>
-  <meta name="description" content="Advanced CAPTCHA system with behavioural analysis, risk scoring and bot detection." />
+  <meta name="description" content="Advanced CAPTCHA system with behavioural analysis, risk scoring, bot detection, interactive workflow pipeline, and local verification history." />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -38,12 +38,29 @@
         System Online
       </span>
 
+      <!-- Settings drawer button -->
+      <button
+        class="header-icon-btn"
+        id="settings-open-btn"
+        type="button"
+        aria-label="Open detection settings drawer"
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        title="Detection Settings & Strictness"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+
       <!-- Theme toggle -->
       <button
         class="theme-toggle"
         id="theme-toggle"
         type="button"
         aria-label="Toggle light and dark theme"
+        title="Toggle Theme"
       >
         <!-- moon (visible in dark mode) -->
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -164,6 +181,7 @@
               id="captcha-refresh"
               type="button"
               aria-label="Generate new CAPTCHA"
+              title="Refresh CAPTCHA"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
             </button>
@@ -349,9 +367,265 @@
   </main>
 
 
+  <!-- ═══════════ HOW IT WORKS PIPELINE ═══════════ -->
+  <section class="section section--pipeline" id="how-it-works" aria-labelledby="pipeline-title">
+    <div class="section__container">
+      <div class="section__header text-center">
+        <span class="hero__pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Architectural Workflow
+        </span>
+        <h2 class="section__heading" id="pipeline-title">How CAPTCHASEC Operates</h2>
+        <p class="section__desc">A multi-stage, zero-latency verification pipeline combining dynamic procedural cryptography with real-time biometric entropy modeling.</p>
+      </div>
+
+      <!-- 4-Stage Animated Pipeline -->
+      <div class="pipeline-grid" role="list" aria-label="Verification pipeline steps">
+        <!-- Stage 1 -->
+        <div class="pipeline-step" role="listitem" id="pipeline-step-1">
+          <div class="pipeline-step__badge">01</div>
+          <div class="pipeline-step__icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3 class="pipeline-step__title">Dynamic Challenge</h3>
+          <p class="pipeline-step__desc">Procedurally generates 5–6 character codes with sinusoidal wave warping, glyph rotation, and interference noise.</p>
+          <span class="pipeline-step__pulse" aria-hidden="true"></span>
+        </div>
+
+        <!-- Stage 2 -->
+        <div class="pipeline-step" role="listitem" id="pipeline-step-2">
+          <div class="pipeline-step__badge">02</div>
+          <div class="pipeline-step__icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+          </div>
+          <h3 class="pipeline-step__title">Telemetry Capture</h3>
+          <p class="pipeline-step__desc">Tracks continuous pointer trajectories (curvature ratio), typing cadence variance, paste events, and tab focus.</p>
+          <span class="pipeline-step__pulse" aria-hidden="true"></span>
+        </div>
+
+        <!-- Stage 3 -->
+        <div class="pipeline-step" role="listitem" id="pipeline-step-3">
+          <div class="pipeline-step__badge">03</div>
+          <div class="pipeline-step__icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <h3 class="pipeline-step__title">Composite Scoring</h3>
+          <p class="pipeline-step__desc">Evaluates 10 weighted biometric &amp; environmental signals into a normalized 0–100 risk index in &lt;10ms.</p>
+          <span class="pipeline-step__pulse" aria-hidden="true"></span>
+        </div>
+
+        <!-- Stage 4 -->
+        <div class="pipeline-step" role="listitem" id="pipeline-step-4">
+          <div class="pipeline-step__badge">04</div>
+          <div class="pipeline-step__icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="pipeline-step__title">Frictionless Decision</h3>
+          <p class="pipeline-step__desc">Grants instant pass for genuine humans, enforces challenge regeneration or automated cooldown lockouts.</p>
+          <span class="pipeline-step__pulse" aria-hidden="true"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════ VERIFICATION HISTORY & TRENDS ═══════════ -->
+  <section class="section section--history" id="verification-history" aria-labelledby="history-title">
+    <div class="section__container">
+      <div class="history-card">
+        <div class="history-card__header">
+          <div>
+            <div class="history-card__label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Audit Log &amp; Analytics
+            </div>
+            <h2 class="history-card__title" id="history-title">Verification History (Last 10 Attempts)</h2>
+          </div>
+          <div class="history-card__actions">
+            <button class="btn-clear-history" id="clear-history-btn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Clear History
+            </button>
+          </div>
+        </div>
+
+        <!-- Summary Metrics Cards -->
+        <div class="history-stats">
+          <div class="history-stat">
+            <span class="history-stat__label">Average Risk Score</span>
+            <span class="history-stat__val" id="stat-avg-score">—</span>
+          </div>
+          <div class="history-stat">
+            <span class="history-stat__label">Human Pass Rate</span>
+            <span class="history-stat__val" id="stat-pass-rate">—</span>
+          </div>
+          <div class="history-stat">
+            <span class="history-stat__label">Logged Attempts</span>
+            <span class="history-stat__val" id="stat-total-attempts">0 attempts</span>
+          </div>
+        </div>
+
+        <!-- Score Sparkline Trend Chart -->
+        <div class="history-chart-wrapper">
+          <div class="history-chart-header">
+            <span class="history-chart-title">Risk Score Trend (0 = Human, 100 = Bot)</span>
+            <div class="history-chart-legend">
+              <span class="legend-item"><span class="legend-dot legend-dot--human"></span>Human (&le;30)</span>
+              <span class="legend-item"><span class="legend-dot legend-dot--suspicious"></span>Suspicious (31–70)</span>
+              <span class="legend-item"><span class="legend-dot legend-dot--bot"></span>Bot (&gt;70)</span>
+            </div>
+          </div>
+          <div class="history-chart" id="history-chart-container">
+            <!-- Rendered by history.js -->
+          </div>
+        </div>
+
+        <!-- History Data Table -->
+        <div class="history-table-wrapper">
+          <table class="history-table" id="history-table" aria-label="Recent verification attempts">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Time</th>
+                <th scope="col">Origin Mode</th>
+                <th scope="col">Solve Time</th>
+                <th scope="col">Risk Index</th>
+                <th scope="col">Outcome</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body">
+              <!-- Populated by history.js -->
+            </tbody>
+          </table>
+          <div class="history-empty" id="history-empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p>No verification records logged yet. Complete a verification or execute a bot simulation above to populate this audit table.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════ SETTINGS DRAWER ═══════════ -->
+  <div class="settings-backdrop" id="settings-backdrop" aria-hidden="true"></div>
+  <aside class="settings-drawer" id="settings-drawer" role="dialog" aria-modal="true" aria-labelledby="settings-title" aria-hidden="true">
+    <div class="settings-drawer__header">
+      <div class="settings-drawer__title-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:18px;height:18px;color:var(--clr-accent)"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <h2 class="settings-drawer__title" id="settings-title">Detection Settings</h2>
+      </div>
+      <button class="settings-drawer__close" id="settings-close-btn" type="button" aria-label="Close settings drawer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="settings-drawer__body">
+      <!-- Strictness Segment -->
+      <div class="settings-section">
+        <label class="settings-section__label" id="strictness-label">Security Strictness</label>
+        <div class="strictness-selector" role="radiogroup" aria-labelledby="strictness-label">
+          <button class="strictness-btn" data-strictness="low" type="button" role="radio" aria-checked="false">
+            <span class="strictness-btn__name">Low</span>
+            <span class="strictness-btn__desc">Lenient (&le;40)</span>
+          </button>
+          <button class="strictness-btn strictness-btn--active" data-strictness="medium" type="button" role="radio" aria-checked="true">
+            <span class="strictness-btn__name">Medium</span>
+            <span class="strictness-btn__desc">Default (&le;30)</span>
+          </button>
+          <button class="strictness-btn" data-strictness="high" type="button" role="radio" aria-checked="false">
+            <span class="strictness-btn__name">High</span>
+            <span class="strictness-btn__desc">Strict (&le;20)</span>
+          </button>
+        </div>
+        <p class="settings-section__hint" id="strictness-desc">Medium (Default): Human &le; 30, Bot &gt; 70. Standard balanced commercial fraud threshold.</p>
+      </div>
+
+      <!-- Detection Layers Toggle List -->
+      <div class="settings-section">
+        <label class="settings-section__label">Active Detection Layers</label>
+        <div class="layer-toggle-list">
+          <!-- Layer 1 -->
+          <label class="layer-toggle-item" for="toggle-layer-timing">
+            <div class="layer-toggle-info">
+              <span class="layer-toggle-title">Solve Time &amp; Latency</span>
+              <span class="layer-toggle-desc">Flags submissions faster than 1.0s (max 20 pts)</span>
+            </div>
+            <input type="checkbox" id="toggle-layer-timing" class="layer-checkbox" data-layer="timing" checked />
+            <span class="switch-slider"></span>
+          </label>
+
+          <!-- Layer 2 -->
+          <label class="layer-toggle-item" for="toggle-layer-mouse">
+            <div class="layer-toggle-info">
+              <span class="layer-toggle-title">Pointer Kinematics &amp; Curvature</span>
+              <span class="layer-toggle-desc">Evaluates linear trajectories and speed variance (max 25 pts)</span>
+            </div>
+            <input type="checkbox" id="toggle-layer-mouse" class="layer-checkbox" data-layer="mouse" checked />
+            <span class="switch-slider"></span>
+          </label>
+
+          <!-- Layer 3 -->
+          <label class="layer-toggle-item" for="toggle-layer-keystrokes">
+            <div class="layer-toggle-info">
+              <span class="layer-toggle-title">Keystroke Cadence &amp; Rhythm</span>
+              <span class="layer-toggle-desc">Detects fixed interval mechanical typing (max 20 pts)</span>
+            </div>
+            <input type="checkbox" id="toggle-layer-keystrokes" class="layer-checkbox" data-layer="keystrokes" checked />
+            <span class="switch-slider"></span>
+          </label>
+
+          <!-- Layer 4 -->
+          <label class="layer-toggle-item" for="toggle-layer-paste">
+            <div class="layer-toggle-info">
+              <span class="layer-toggle-title">Clipboard Paste Interception</span>
+              <span class="layer-toggle-desc">Flags automated script paste events (max 10 pts)</span>
+            </div>
+            <input type="checkbox" id="toggle-layer-paste" class="layer-checkbox" data-layer="paste" checked />
+            <span class="switch-slider"></span>
+          </label>
+
+          <!-- Layer 5 -->
+          <label class="layer-toggle-item" for="toggle-layer-honeypot">
+            <div class="layer-toggle-info">
+              <span class="layer-toggle-title">Hidden Honeypot Field</span>
+              <span class="layer-toggle-desc">Zero-tolerance crawler trap (max 15 pts)</span>
+            </div>
+            <input type="checkbox" id="toggle-layer-honeypot" class="layer-checkbox" data-layer="honeypot" checked />
+            <span class="switch-slider"></span>
+          </label>
+
+          <!-- Layer 6 -->
+          <label class="layer-toggle-item" for="toggle-layer-env">
+            <div class="layer-toggle-info">
+              <span class="layer-toggle-title">Environment &amp; Automation Probes</span>
+              <span class="layer-toggle-desc">Probes navigator.webdriver and headless flags (max 5 pts)</span>
+            </div>
+            <input type="checkbox" id="toggle-layer-env" class="layer-checkbox" data-layer="env" checked />
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Reset Settings -->
+      <div class="settings-drawer__footer">
+        <button class="btn-reset-defaults" id="settings-reset-defaults" type="button">
+          Restore Default Configuration
+        </button>
+      </div>
+    </div>
+  </aside>
+
+
   <!-- ═══════════ FOOTER ═══════════ -->
   <footer class="site-footer" role="contentinfo">
-    <p>&copy; 2026 CAPTCHASEC. Built for demonstration purposes.</p>
+    <div class="footer__container">
+      <div class="footer__privacy-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;color:var(--clr-success);flex-shrink:0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span><strong>100% Client-Side Privacy Guarantee:</strong> All biometric kinematics, telemetry capture, and risk scoring algorithms execute strictly inside your local browser sandbox. Zero user telemetry, typing data, or audio signals are ever stored remotely or transmitted over the network.</span>
+      </div>
+      <p class="footer__copy">&copy; 2026 CAPTCHASEC. Intelligent Human Verification Demonstration.</p>
+    </div>
   </footer>
 
 
@@ -367,6 +641,7 @@
   <!-- Scripts -->
   <script src="js/storage.js"    defer></script>
   <script src="js/ui.js"         defer></script>
+  <script src="js/history.js"    defer></script>
   <script src="js/behaviour.js"  defer></script>
   <script src="js/scoring.js"    defer></script>
   <script src="js/captcha.js"    defer></script>

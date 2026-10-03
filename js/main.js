@@ -7,9 +7,13 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Theme & UI
+  // Theme & Detection settings
   UI.initTheme();
   EventLog.init();
+  Settings.init();
+
+  // Verification history log & sparkline
+  History.init();
 
   // Behaviour tracking (must init before captcha so listeners are ready)
   Behaviour.init();

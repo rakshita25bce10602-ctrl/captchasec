@@ -122,6 +122,10 @@ const Simulation = (() => {
         EventLog.log('BOT', `▶ Starting ${activeMode.toUpperCase()} simulation against challenge [${targetCode}]`);
       }
 
+      if (typeof PipelineAnimation !== 'undefined') {
+        PipelineAnimation.activateStage(2);
+      }
+
       switch (activeMode) {
         case 'instant':
           await runInstantBot(targetCode, signal);
@@ -539,6 +543,16 @@ const Simulation = (() => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
+  function getActiveModeTitle() {
+    const titles = {
+      instant:   'Instant Bot',
+      slow:      'Slow Bot',
+      pasting:   'Pasting Bot',
+      humanlike: 'Human-like Bot',
+    };
+    return titles[activeMode] || 'Automated Bot';
+  }
+
   /* ── public API ── */
   return {
     init,
@@ -546,5 +560,6 @@ const Simulation = (() => {
     run,
     stop,
     isRunning: () => isRunning,
+    getActiveModeTitle,
   };
 })();

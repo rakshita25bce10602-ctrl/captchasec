@@ -99,6 +99,10 @@ const Captcha = (() => {
     /* reset behaviour tracking for this challenge */
     if (typeof Behaviour !== 'undefined') Behaviour.reset();
 
+    if (typeof PipelineAnimation !== 'undefined') {
+      PipelineAnimation.activateStage(1);
+    }
+
     if (typeof EventLog !== 'undefined') {
       EventLog.log('SYSTEM', `New dynamic challenge rendered (${code.length} chars, noise + wave distortion)`);
     }
@@ -295,24 +299,42 @@ const Captcha = (() => {
     updateMetric('metric-attempts', `${attempts} / ${CFG.MAX_ATTEMPTS}`);
 
     /* run scoring engine */
+    let evalResult = { score: 25, label: 'Human' };
     if (typeof Behaviour !== 'undefined' && typeof Scoring !== 'undefined') {
+      if (typeof PipelineAnimation !== 'undefined') PipelineAnimation.activateStage(3);
       const signals = Behaviour.getSignals();
-      Scoring.evaluate(signals);
+      evalResult = Scoring.evaluate(signals);
     }
+
+    const currentMode = (typeof Simulation !== 'undefined' && Simulation.isRunning())
+      ? Simulation.getActiveModeTitle()
+      : 'Manual User';
 
     /* compare (case-insensitive) */
     if (input.toLowerCase() === code.toLowerCase()) {
-      onSuccess(elapsed);
+      if (typeof PipelineAnimation !== 'undefined') PipelineAnimation.activateStage(4);
+      onSuccess(elapsed, evalResult, currentMode);
     } else {
-      onFail();
+      if (typeof PipelineAnimation !== 'undefined') PipelineAnimation.activateStage(4);
+      onFail(evalResult, currentMode);
     }
   }
 
   /* ── success ── */
-  function onSuccess(elapsed) {
+  function onSuccess(elapsed, evalResult, mode) {
     clearInterval(timerID);
     $input.disabled    = true;
     $verifyBtn.disabled = true;
+
+    if (typeof History !== 'undefined') {
+      History.addEntry({
+        result: 'Passed',
+        score: evalResult ? evalResult.score : 25,
+        label: evalResult ? evalResult.label : 'Human',
+        solveTime: `${elapsed}s`,
+        mode: mode || 'Manual User',
+      });
+    }
 
     showOverlay('success');
     setFeedback('✓ Verification successful!', 'success');
@@ -328,8 +350,20 @@ const Captcha = (() => {
   }
 
   /* ── failure ── */
-  function onFail() {
+  function onFail(evalResult, mode) {
     if (typeof Behaviour !== 'undefined') Behaviour.trackFailedAttempt();
+
+    const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+    if (typeof History !== 'undefined') {
+      History.addEntry({
+        result: attempts >= CFG.MAX_ATTEMPTS ? 'Locked' : 'Failed',
+        score: evalResult ? evalResult.score : 70,
+        label: evalResult ? evalResult.label : 'Suspicious',
+        solveTime: `${elapsed}s`,
+        mode: mode || 'Manual User',
+      });
+    }
+
     shakeCard();
     setFeedback(
       `✗ Incorrect code. ${CFG.MAX_ATTEMPTS - attempts} attempt${CFG.MAX_ATTEMPTS - attempts === 1 ? '' : 's'} remaining.`,
