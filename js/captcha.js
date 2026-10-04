@@ -282,15 +282,6 @@ const Captcha = (() => {
       return;
     }
 
-    /* honeypot check */
-    const hp = UI.$('hp-email');
-    if (hp && hp.value) {
-      setFeedback('Verification failed.', 'error');
-      updateMetric('metric-honeypot', 'Triggered', 'var(--clr-danger)');
-      shakeCard();
-      return;
-    }
-
     /* response time */
     const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
     updateMetric('metric-time', `${elapsed}s`);
@@ -513,7 +504,7 @@ const Captcha = (() => {
       $input.disabled = false;
     }
     if ($verifyBtn) $verifyBtn.disabled = false;
-    const hp = UI.$('hp-email');
+    const hp = UI.$('form-website-field') || UI.$('hp-email');
     if (hp) hp.value = '';
     if ($card) {
       $card.className = 'card';
@@ -526,7 +517,7 @@ const Captcha = (() => {
     updateMetric('metric-time', '0.00s');
     updateMetric('metric-paste', '0');
     updateMetric('metric-attempts', `0 / ${CFG.MAX_ATTEMPTS}`);
-    updateMetric('metric-honeypot', 'Clean', 'var(--clr-success)');
+    updateMetric('metric-honeypot', 'PASS', 'var(--clr-success)');
 
     if (typeof Scoring !== 'undefined') {
       Scoring.updateUI({

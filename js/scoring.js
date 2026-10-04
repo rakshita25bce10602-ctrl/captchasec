@@ -15,11 +15,11 @@
  * │   10   │ Keystroke speed          │ Sub-50 ms inter-key = likely automated      │
  * │   10   │ Keystroke rhythm         │ Constant rhythm (low σ) = robotic           │
  * │   10   │ Paste detected           │ Pasting CAPTCHA text ⟹ likely scripted      │
- * │   15   │ Honeypot triggered       │ Filling a hidden field is definitive        │
- * │    5   │ Failed attempts          │ Repeated failures suggest brute-force       │
+ * │   30   │ Honeypot trap            │ Hidden field populated ⟹ automated crawler  │
+ * │    5   │ Form abuse / failures    │ Rapid refreshes & repeated failed attempts  │
  * │    5   │ Environment flags        │ navigator.webdriver, headless hints, etc.   │
  * ├────────┼──────────────────────────┼─────────────────────────────────────────────┤
- * │  100   │ TOTAL                    │                                             │
+ * │  115   │ TOTAL (clamped 0–100)    │ Multi-layer compounding risk score          │
  * └────────┴──────────────────────────┴─────────────────────────────────────────────┘
  *
  * Strictness Thresholds:
@@ -63,17 +63,17 @@ const Scoring = (() => {
     if (layers.timing) {
       let timePts = 0;
       const t = signals.solveTime;
-      if      (t < 1)  timePts = 20;
-      else if (t < 2)  timePts = 15;
-      else if (t < 3)  timePts = 8;
+      if      (t < 0.8) timePts = 20;
+      else if (t < 1.5) timePts = 15;
+      else if (t < 2.5) timePts = 8;
       breakdown.push({
         label: 'Solve time',
         pts: timePts,
         max: 20,
-        note: t < 1 ? `${t.toFixed(2)}s — impossibly fast`
-            : t < 2 ? `${t.toFixed(2)}s — very fast`
-            : t < 3 ? `${t.toFixed(2)}s — borderline`
-            :         `${t.toFixed(2)}s — normal human range`,
+        note: t < 0.8 ? `${t.toFixed(2)}s — impossibly fast (<0.8s)`
+            : t < 1.5 ? `${t.toFixed(2)}s — rapid automated execution`
+            : t < 2.5 ? `${t.toFixed(2)}s — borderline fast response`
+            :           `${t.toFixed(2)}s — normal human range (2.5–15s)`,
       });
     } else {
       breakdown.push({ label: 'Solve time', pts: 0, max: 20, note: 'Layer disabled in settings' });
@@ -130,13 +130,13 @@ const Scoring = (() => {
         pts: speedPts,
         max: 5,
         note: sσ === null ? 'Insufficient movement data'
-            : `σ = ${sσ.toFixed(3)} — ${sσ < 0.15 ? 'constant robotic velocity' : 'varied speed'}`,
+            : `σ = ${sσ.toFixed(3)} — ${sσ < 0.15 ? 'constant robotic velocity' : 'varied human speed'}`,
       });
     } else {
       breakdown.push({ label: 'Speed variance', pts: 0, max: 5, note: 'Layer disabled in settings' });
     }
 
-    /* ── 5. Keystroke speed  (max +10) ──────────────────── */
+    /* ── 5. Keystroke speed & injection (max +10) ────────── */
     if (layers.keystrokes) {
       let keySpeedPts = 0;
       const ks = signals.keystrokeStats;
@@ -144,12 +144,17 @@ const Scoring = (() => {
         if      (ks.mean < 50)  keySpeedPts = 10;
         else if (ks.mean < 100) keySpeedPts = 6;
         else if (ks.mean < 150) keySpeedPts = 2;
+      } else if (signals.keystrokeCount === 0 && signals.solveTime < 1.5) {
+        // Direct value injection with 0 keyboard events
+        keySpeedPts = 10;
       }
       breakdown.push({
         label: 'Typing speed',
         pts: keySpeedPts,
         max: 10,
         note: ks ? `μ = ${ks.mean.toFixed(0)}ms — ${ks.mean < 100 ? 'rapid scripted cadence' : 'natural human cadence'}`
+                 : (signals.keystrokeCount === 0 && signals.solveTime < 1.5)
+                 ? 'Zero keystrokes recorded — direct value injection'
                  : 'No keyboard events recorded',
       });
     } else {
@@ -192,37 +197,42 @@ const Scoring = (() => {
       breakdown.push({ label: 'Paste events', pts: 0, max: 10, note: 'Layer disabled in settings' });
     }
 
-    /* ── 8. Honeypot triggered  (max +15) ────────────── */
+    /* ── 8. Honeypot triggered  (max +30) ────────────── */
     if (layers.honeypot) {
-      const hpPts = signals.honeypotFilled ? 15 : 0;
+      const hpPts = signals.honeypotFilled ? 30 : 0;
       breakdown.push({
-        label: 'Honeypot',
+        label: 'Honeypot trap',
         pts: hpPts,
-        max: 15,
+        max: 30,
         note: signals.honeypotFilled
-          ? 'Trap triggered — hidden input populated'
-          : 'Clean',
+          ? 'Honeypot field was populated. This is commonly associated with automated form interaction.'
+          : 'Empty (PASS) — normal user interaction',
       });
     } else {
-      breakdown.push({ label: 'Honeypot', pts: 0, max: 15, note: 'Layer disabled in settings' });
+      breakdown.push({ label: 'Honeypot trap', pts: 0, max: 30, note: 'Layer disabled in settings' });
     }
 
-    /* ── 9. Failed attempts  (max +5) ────────────────── */
-    const failPts = Math.min(signals.failedAttempts * 1, 5);
+    /* ── 9. Form abuse & Failures  (max +5) ───────────── */
+    let abusePts = Math.min(signals.failedAttempts * 2, 4);
+    if (signals.rapidRefreshes > 0) abusePts = Math.min(abusePts + 3, 5);
     breakdown.push({
-      label: 'Failed attempts',
-      pts: failPts,
+      label: 'Abuse signals',
+      pts: abusePts,
       max: 5,
-      note: signals.failedAttempts > 0
-        ? `${signals.failedAttempts} failure(s) recorded`
-        : 'None',
+      note: signals.rapidRefreshes > 0
+        ? `Rapid challenge refreshes (${signals.refreshCount} total, ${signals.rapidRefreshes} rapid)`
+        : signals.failedAttempts > 0
+        ? `${signals.failedAttempts} failed attempt(s) recorded`
+        : 'Clean — normal attempt flow',
     });
 
     /* ── 10. Environment flags  (max +5) ─────────────── */
     if (layers.env) {
-      const envHits = Object.values(signals.env).filter(Boolean);
-      const envPts = Math.min(envHits.length * 2, 5);
-      const envNames = Object.entries(signals.env)
+      const envHits = Object.values(signals.env || {}).filter(Boolean);
+      let envPts = 0;
+      if (signals.env && signals.env.webdriver) envPts = 5;
+      else if (envHits.length > 0) envPts = Math.min(envHits.length * 2, 5);
+      const envNames = Object.entries(signals.env || {})
         .filter(([, v]) => v)
         .map(([k]) => k)
         .join(', ');
@@ -266,10 +276,23 @@ const Scoring = (() => {
   }
 
   /* ═══════════════════════════════════════════════════════
-     updateUI(result) — push score + breakdown to the DOM
+     updateUI(result, signals) — push score + breakdown to the DOM
      ═══════════════════════════════════════════════════════ */
-  function updateUI(result) {
+  function updateUI(result, signals = null) {
     const { score, label, colour, breakdown } = result;
+
+    /* ── honeypot metric badge ── */
+    const $hpMetric = UI.$('metric-honeypot');
+    if ($hpMetric) {
+      const isHpFilled = signals ? !!signals.honeypotFilled : false;
+      if (isHpFilled) {
+        $hpMetric.textContent = 'BOT SIGNAL';
+        $hpMetric.style.color = 'var(--clr-danger)';
+      } else {
+        $hpMetric.textContent = 'PASS';
+        $hpMetric.style.color = 'var(--clr-success)';
+      }
+    }
 
     /* ── risk ring ── */
     const $fill   = UI.$('risk-fill');
@@ -310,10 +333,17 @@ const Scoring = (() => {
 
   /** Convenience: compute + render in one call. */
   function evaluate(signals) {
+    const settings = getActiveSettings();
     const result = compute(signals);
-    updateUI(result);
+    updateUI(result, signals);
+
     if (typeof EventLog !== 'undefined') {
-      EventLog.log('SCORE', `Risk Score: ${result.score}/100 (${result.label} [Strictness: ${result.strictness.toUpperCase()}])`);
+      if (signals.honeypotFilled && settings.layers.honeypot) {
+        EventLog.log('SECURITY', 'Honeypot field triggered');
+        EventLog.log('SECURITY', '+Risk: honeypot signal');
+      }
+      EventLog.log('SCORE', `Risk score updated: ${result.score}`);
+      EventLog.log('SECURITY', `Decision: ${result.label.toUpperCase()}`);
     }
     return result;
   }

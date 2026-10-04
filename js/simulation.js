@@ -72,7 +72,7 @@ const Simulation = (() => {
     const modeLabel = UI.$('current-mode-label');
     if (modeLabel) {
       const names = {
-        instant:   'Mode: Instant Bot (⚡ 0ms Direct Injection)',
+        instant:   'Mode: Instant Bot (⚡ 0ms Direct Injection + Honeypot)',
         slow:      'Mode: Slow Bot (🤖 Linear Trajectory & Robotic Cadence)',
         pasting:   'Mode: Pasting Bot (📋 Clipboard Paste & Honeypot)',
         humanlike: 'Mode: Human-like Bot (👤 Bézier Curve & Variable Cadence)',
@@ -185,14 +185,16 @@ const Simulation = (() => {
      ═══════════════════════════════════════════ */
   async function runInstantBot(code, signal) {
     const input = UI.$('captcha-input');
+    const hp = UI.$('form-website-field') || UI.$('hp-email');
     const verifyBtn = UI.$('verify-btn');
 
     if (typeof EventLog !== 'undefined') {
-      EventLog.log('BOT', 'Direct memory assignment to DOM element (0ms latency)');
+      EventLog.log('BOT', 'Direct memory assignment to DOM element & honeypot (0ms latency)');
     }
 
-    // Direct value injection with no mouse or keyboard events
+    // Direct value injection with no mouse or keyboard events, populating honeypot trap
     if (input) input.value = code;
+    if (hp) hp.value = 'https://bot-crawler-auto.io';
 
     await sleep(40, signal);
 
@@ -271,7 +273,7 @@ const Simulation = (() => {
      ═══════════════════════════════════════════ */
   async function runPastingBot(code, signal) {
     const input = UI.$('captcha-input');
-    const hp = UI.$('hp-email');
+    const hp = UI.$('form-website-field') || UI.$('hp-email');
     const verifyBtn = UI.$('verify-btn');
     const card = document.querySelector('.card');
     const cardRect = card.getBoundingClientRect();
@@ -291,9 +293,9 @@ const Simulation = (() => {
 
     // 1. Populate Honeypot field (naive scraper bot behaviour)
     if (hp) {
-      hp.value = 'bot-scraped-field@automated.xyz';
+      hp.value = 'https://bot-scraped-field.xyz';
       if (typeof EventLog !== 'undefined') {
-        EventLog.log('SECURITY', 'Honeypot field filled: email_confirm = "bot-scraped-field@automated.xyz"');
+        EventLog.log('SECURITY', 'Honeypot field filled: website = "https://bot-scraped-field.xyz"');
       }
     }
 

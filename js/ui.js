@@ -276,13 +276,14 @@ const EventLog = (() => {
     sessionStart = performance.now();
   }
 
-  function getRelativeTime() {
-    const elapsed = Math.max(0, (performance.now() - sessionStart) / 1000);
-    return `+${elapsed.toFixed(2)}s`;
+  function getTimestamp() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `[${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}]`;
   }
 
   function log(category, message, details = '') {
-    const timeStr = getRelativeTime();
+    const timeStr = getTimestamp();
     const entry = { time: timeStr, category, message, details, timestamp: Date.now() };
     entries.push(entry);
 

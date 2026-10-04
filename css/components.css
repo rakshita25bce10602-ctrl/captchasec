@@ -572,15 +572,21 @@
   box-shadow: 0 0 0 3px var(--clr-accent-glow);
 }
 
-/* honeypot field (hidden from humans) */
+/* Honeypot field (hidden from visual presentation, NOT display:none, NOT disabled) */
 .hp-field {
-  position: absolute;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-  tab-index: -1;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* ── primary button ── */

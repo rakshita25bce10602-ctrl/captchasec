@@ -212,10 +212,18 @@
         <!-- Feedback message -->
         <div class="captcha-feedback" id="captcha-feedback" role="alert" aria-live="assertive"></div>
 
-        <!-- Honeypot (invisible to real users) -->
+        <!-- Honeypot Anti-Bot Trap: Visually hidden from humans, non-navigable by keyboard (tabindex="-1"), omitted from screen readers (aria-hidden="true"), attractive to automated scrapers/crawlers -->
         <div class="hp-field" aria-hidden="true">
-          <label for="hp-email">Leave this empty</label>
-          <input type="text" id="hp-email" name="email_confirm" tabindex="-1" autocomplete="off" />
+          <label for="form-website-field" tabindex="-1">Website</label>
+          <input
+            type="text"
+            id="form-website-field"
+            name="website"
+            autocomplete="off"
+            tabindex="-1"
+            aria-hidden="true"
+            placeholder="https://example.com"
+          />
         </div>
 
         <!-- Verify button -->
@@ -246,7 +254,7 @@
               <span class="bot-mode-btn__icon">⚡</span>
               <div class="bot-mode-btn__info">
                 <span class="bot-mode-btn__title">Instant Bot</span>
-                <span class="bot-mode-btn__sub">0ms direct injection</span>
+                <span class="bot-mode-btn__sub">0ms direct injection + honeypot</span>
               </div>
             </button>
             <button class="bot-mode-btn" data-mode="slow" type="button" role="radio" aria-checked="false">
@@ -311,7 +319,7 @@
               </div>
               <div class="metric" role="listitem">
                 <span class="metric__label">Honeypot</span>
-                <span class="metric__value" id="metric-honeypot" aria-live="polite" style="color:var(--clr-success)">Clean</span>
+                <span class="metric__value" id="metric-honeypot" aria-live="polite" style="color:var(--clr-success)">PASS</span>
               </div>
             </div>
 
@@ -589,7 +597,7 @@
           <label class="layer-toggle-item" for="toggle-layer-honeypot">
             <div class="layer-toggle-info">
               <span class="layer-toggle-title">Hidden Honeypot Field</span>
-              <span class="layer-toggle-desc">Zero-tolerance crawler trap (max 15 pts)</span>
+              <span class="layer-toggle-desc">Zero-tolerance crawler trap (max 30 pts)</span>
             </div>
             <input type="checkbox" id="toggle-layer-honeypot" class="layer-checkbox" data-layer="honeypot" checked />
             <span class="switch-slider"></span>

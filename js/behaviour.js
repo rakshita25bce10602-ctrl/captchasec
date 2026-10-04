@@ -21,19 +21,26 @@
 
 const Behaviour = (() => {
   /* ─────────── state ─────────── */
-  let mousePoints     = [];   // { x, y, t }
-  let keystrokeTimes  = [];   // timestamps (ms)
-  let pasteCount      = 0;
-  let refreshCount    = 0;
-  let failedAttempts  = 0;
-  let focusBlurs      = 0;
-  let hiddenDuration  = 0;    // ms spent with tab hidden
-  let hiddenSince     = null;
-  let startTime       = 0;    // challenge-start (performance.now)
-  let hasMouseMoved   = false;
-  let envFlags        = {};   // computed once in init()
-  let active          = false;
-  let lastLoggedMouse = 0;
+  let mousePoints         = [];   // { x, y, t }
+  let keystrokeTimes      = [];   // timestamps (ms)
+  let pasteCount          = 0;
+  let refreshCount        = 0;
+  let refreshTimestamps   = [];   // timestamps of refreshes for rapid burst detection
+  let rapidRefreshes      = 0;
+  let failedAttempts      = 0;
+  let focusBlurs          = 0;
+  let visibilitySwitches  = 0;
+  let hiddenDuration      = 0;    // ms spent with tab hidden
+  let hiddenSince         = null;
+  let startTime           = 0;    // challenge-start (performance.now)
+  let hasMouseMoved       = false;
+  let envFlags            = {};   // computed once in init()
+  let active              = false;
+  let lastLoggedMouse     = 0;
+
+  function getHoneypotElement() {
+    return UI.$('form-website-field') || UI.$('hp-email') || document.querySelector('.hp-field input');
+  }
 
   /* ─────────── init ─────────── */
   function init() {
@@ -54,11 +61,11 @@ const Behaviour = (() => {
     }
 
     /* honeypot monitor */
-    const hp = UI.$('hp-email');
+    const hp = getHoneypotElement();
     if (hp) {
       hp.addEventListener('input', () => {
         if (hp.value && typeof EventLog !== 'undefined') {
-          EventLog.log('SECURITY', 'Honeypot field modified: email_confirm populated!');
+          EventLog.log('SECURITY', 'Honeypot field triggered (hidden field populated)');
         }
       });
     }
@@ -81,16 +88,17 @@ const Behaviour = (() => {
 
   /** Soft reset — clears per-challenge data, keeps session counters. */
   function reset() {
-    mousePoints    = [];
-    keystrokeTimes = [];
-    pasteCount     = 0;
-    hasMouseMoved  = false;
-    hiddenDuration = 0;
-    hiddenSince    = null;
-    focusBlurs     = 0;
-    startTime      = performance.now();
-    active         = true;
-    lastLoggedMouse = 0;
+    mousePoints        = [];
+    keystrokeTimes     = [];
+    pasteCount         = 0;
+    hasMouseMoved      = false;
+    hiddenDuration     = 0;
+    hiddenSince        = null;
+    focusBlurs         = 0;
+    visibilitySwitches = 0;
+    startTime          = performance.now();
+    active             = true;
+    lastLoggedMouse    = 0;
     if (typeof EventLog !== 'undefined') {
       EventLog.resetSession();
     }
@@ -99,8 +107,10 @@ const Behaviour = (() => {
   /** Hard reset — clears everything (after success / lockout end / demo reset). */
   function fullReset() {
     reset();
-    refreshCount   = 0;
-    failedAttempts = 0;
+    refreshCount       = 0;
+    refreshTimestamps  = [];
+    rapidRefreshes     = 0;
+    failedAttempts     = 0;
   }
 
   /* ─────────── event handlers ─────────── */
@@ -171,6 +181,7 @@ const Behaviour = (() => {
   }
 
   function onVisibility() {
+    visibilitySwitches++;
     if (document.hidden) {
       hiddenSince = performance.now();
       if (typeof EventLog !== 'undefined') EventLog.log('SYSTEM', 'Tab switched to background / hidden');
@@ -251,6 +262,8 @@ const Behaviour = (() => {
   function getSignals() {
     const now = performance.now();
     const solveTime = (now - startTime) / 1000;
+    const hp = getHoneypotElement();
+    const honeypotFilled = !!(hp && hp.value && hp.value.trim().length > 0);
 
     return {
       solveTime,
@@ -261,10 +274,12 @@ const Behaviour = (() => {
       keystrokeStats:    keystrokeStats(),
       keystrokeCount:    keystrokeTimes.length,
       pasteCount,
-      honeypotFilled:    !!(UI.$('hp-email') && UI.$('hp-email').value),
+      honeypotFilled,
       failedAttempts,
       refreshCount,
+      rapidRefreshes,
       focusBlurs,
+      visibilitySwitches,
       hiddenDuration,
       env: { ...envFlags },
     };
@@ -272,7 +287,19 @@ const Behaviour = (() => {
 
   /* ─────────── session counters ─────────── */
   function trackRefresh() {
+    const now = performance.now();
     refreshCount++;
+    refreshTimestamps.push(now);
+
+    // Keep only timestamps from the last 10 seconds
+    refreshTimestamps = refreshTimestamps.filter(t => now - t <= 10000);
+    if (refreshTimestamps.length >= 3) {
+      rapidRefreshes++;
+      if (typeof EventLog !== 'undefined') {
+        EventLog.log('SECURITY', `Rapid CAPTCHA refreshes detected (${refreshTimestamps.length} in <10s)`);
+      }
+    }
+
     if (typeof EventLog !== 'undefined') EventLog.log('SYSTEM', `Challenge refreshed (count: ${refreshCount})`);
   }
 
