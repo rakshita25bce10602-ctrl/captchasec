@@ -493,6 +493,11 @@ const Captcha = (() => {
     else el.style.color = '';
   }
 
+  function updateStatus(text) {
+    const el = UI.$('analytics-status-text');
+    if (el) el.textContent = text;
+  }
+
   function resetDemo() {
     clearInterval(timerID);
     if (cooldownID) clearInterval(cooldownID);
